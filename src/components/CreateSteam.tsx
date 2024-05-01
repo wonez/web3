@@ -1,10 +1,10 @@
 import { Wallet } from "@solana/wallet-adapter-react";
 import { FormEvent } from "react";
-import { StreamflowSolana, ICreateStreamData, getBN } from "@streamflow/stream";
-import { BN } from "bn.js";
+import { StreamflowSolana } from "@streamflow/stream";
 import { SignerWalletAdapter } from "@solana/wallet-adapter-base";
 import { client } from "../utils/constants.ts";
 import { FormValues } from "../utils/interfaces.ts";
+import { generateCreateStreamProps } from "../utils/helpers.ts";
 
 interface IProps {
   tokenMint: string;
@@ -17,28 +17,13 @@ const CreateStream = ({ tokenMint, decimals, wallet }: IProps) => {
     e.preventDefault();
 
     const formData = new FormData(e.target as HTMLFormElement);
-    const values: FormValues = Object.fromEntries(
-      formData,
-    ) as unknown as FormValues;
+    const values = Object.fromEntries(formData) as unknown as FormValues;
 
-    const createStreamParams: ICreateStreamData = {
-      recipient: values.recipient,
-      tokenId: tokenMint,
-      start: 0,
-      amount: getBN(parseFloat(values.amount), decimals),
-      period: 1,
-      cliff: 0,
-      cliffAmount: new BN(0, 2),
-      amountPerPeriod: getBN(parseFloat(values.amount), decimals),
-      name: values.name as string,
-      canTopup: true,
-      cancelableBySender: true,
-      cancelableByRecipient: false,
-      transferableBySender: true,
-      transferableByRecipient: false,
-      automaticWithdrawal: true,
-      withdrawalFrequency: 1,
-    };
+    const createStreamParams = generateCreateStreamProps(
+      values,
+      tokenMint,
+      decimals,
+    );
 
     const extParams: StreamflowSolana.ICreateStreamSolanaExt = {
       sender: wallet.adapter as SignerWalletAdapter,
